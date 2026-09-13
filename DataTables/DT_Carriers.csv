@@ -1,0 +1,5 @@
+Name,DisplayName,CarrierType,bConcealsVisuals,DoseCoefficient,DefaultResidueHits
+Carrier_SoupPot,Soup Pot,Ingestion,True,1.0,1
+Carrier_WineCup,Wine Cup,Ingestion,False,1.0,1
+Carrier_StairRailing,Stair Railing,Contact,True,0.5,3
+Carrier_Razor,Razor,Contact,False,1.0,3

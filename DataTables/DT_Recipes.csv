@@ -1,0 +1,2 @@
+Name,DisplayName,InputItemId,RequiredInputCount,OutputPoisonId,ProcessingDuration
+Recipe_Hemlock,Hemlock Preparation,Item_ToxicPlant,1,Poison_Hemlock,4.0

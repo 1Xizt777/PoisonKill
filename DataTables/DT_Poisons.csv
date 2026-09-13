@@ -1,0 +1,3 @@
+Name,DisplayName,SingleDose,LethalThreshold,IncubationTime,VisualSignificance,AllowedCarrierTypes
+Poison_Hemlock,Hemlock,4.0,4.0,0.0,High,"(Ingestion)"
+Poison_LeadSugar,Lead Sugar,1.0,4.0,40.0,Low,"(Ingestion,Contact)"
