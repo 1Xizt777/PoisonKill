@@ -1,8 +1,9 @@
-﻿#include "Character/PlayerCharacter.h"
+#include "Character/PlayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Items/PKInventoryComponent.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -14,7 +15,10 @@ APlayerCharacter::APlayerCharacter()
 	bUseControllerRotationRoll = false;
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	
+	InventoryComponent = CreateDefaultSubobject<UPKInventoryComponent>(TEXT("InventoryComponent"));
+
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->bUsePawnControlRotation = true;

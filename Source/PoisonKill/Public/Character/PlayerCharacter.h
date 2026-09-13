@@ -1,4 +1,4 @@
-﻿
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -6,6 +6,7 @@
 #include "PlayerCharacter.generated.h"
 
 class UCameraComponent;
+class UPKInventoryComponent;
 class USpringArmComponent;
 
 UCLASS()
@@ -22,6 +23,10 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Inventory", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UPKInventoryComponent> InventoryComponent;
+
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
