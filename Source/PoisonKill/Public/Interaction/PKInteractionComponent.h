@@ -41,11 +41,13 @@ public:
 	bool BeginInteraction();		//开始交互
 
 	UFUNCTION(BlueprintCallable, Category = "PK|Interaction")
-	void EndInteraction(bool bForceCancel = false);		//处理松手和取消
-
+	void EndInteraction(bool bForceCancel = false);		//取消交互：处理松手和Npc看到强制取消
+	
 	UFUNCTION(BlueprintCallable, Category = "PK|Interaction")
 	void CancelInteraction();		//NPC 看见玩家导致施用中断
 
+	
+	//----Begin----//
 	UFUNCTION(BlueprintPure, Category = "PK|Interaction")
 	bool IsInteractionLocked() const;		
 
@@ -59,17 +61,19 @@ public:
 	float GetNormalizedProgress() const;
 
 	const FPKInteractionRequest& GetCurrentRequest() const;
-
+	//----End----//
+	
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime,ELevelTick TickType,FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PK|Interaction", meta = (ClampMin = "1.0", Units = "cm"))
-	float InteractionRange = 150.0f;
+	float InteractionRange = 150.0f;		//搜索范围
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PK|Interaction", meta = (ClampMin = "0.01", Units = "s"))
-	float TargetRefreshInterval = 0.1f;
+	float TargetRefreshInterval = 0.1f;		//重新搜索交互间隔
 
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "PK|Interaction", meta = (AllowPrivateAccess = "true"))
@@ -84,10 +88,10 @@ private:
 
 	TMap<TWeakObjectPtr<AActor>, float> RetainedProgress;	//保留的进度
 
-	void RefreshCurrentTarget();
+	void RefreshCurrentTarget();		//重新搜索交互Target函数
 	void SetCurrentTarget(AActor* NewTarget, const FPKInteractionRequest& NewRequest);
 	void CompleteInteraction();
-	void BroadcastProgress();
+	void BroadcastProgress();	//广播进度函数
 
 	friend struct FPKInteractionComponentTestAccessor;
 };

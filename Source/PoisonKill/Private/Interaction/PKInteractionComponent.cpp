@@ -12,14 +12,14 @@ UPKInteractionComponent::UPKInteractionComponent()
 void UPKInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	RefreshCurrentTarget();
+	RefreshCurrentTarget();		//搜索一次
 }
 
 void UPKInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (bInteractionPressed)
+	if (bInteractionPressed)	//还在按着
 	{
-		EndInteraction(true);
+		EndInteraction(true);		//强制取消
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -30,26 +30,26 @@ void UPKInteractionComponent::TickComponent(const float DeltaTime , const ELevel
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	TargetRefreshElapsed += DeltaTime;
-	if (TargetRefreshElapsed >= TargetRefreshInterval)
+	if (TargetRefreshElapsed >= TargetRefreshInterval)		//到达 0.1 秒就重新搜索目标
 	{
 		TargetRefreshElapsed = 0.0f;
-		RefreshCurrentTarget();
+		RefreshCurrentTarget();		//重新搜索目标
 	}
 
-	if (!bInteractionPressed || !CurrentTarget)
+	if (!bInteractionPressed || !CurrentTarget)		//没长按直接返回
 	{
 		return;
 	}
 
-	ElapsedHoldTime += DeltaTime;
-	BroadcastProgress();
+	ElapsedHoldTime += DeltaTime;	//在长按 ，已经按住的时间 += DeltaTime
+	BroadcastProgress();	//广播进度
 
 	APawn* Interactor = Cast<APawn>(GetOwner());
-	IPKInteractable::Execute_OnInteractionProgressUpdated(CurrentTarget , Interactor , GetNormalizedProgress());
+	IPKInteractable::Execute_OnInteractionProgressUpdated(CurrentTarget , Interactor , GetNormalizedProgress());		//广播正在长按
 
-	if (ElapsedHoldTime >= CurrentRequest.HoldDuration)
+	if (ElapsedHoldTime >= CurrentRequest.HoldDuration)	//长按完成
 	{
-		CompleteInteraction();
+		CompleteInteraction();	//调用完成交互函数
 	}
 }
 
@@ -69,7 +69,7 @@ bool UPKInteractionComponent::BeginInteraction()
 	if (CurrentRequest.HoldDuration <= 0.0f)	//持续时间小于等于 0 则立即完成
 	{
 		ElapsedHoldTime = CurrentRequest.HoldDuration;
-		CompleteInteraction();
+		CompleteInteraction();		//立刻完成
 		return true;
 	}
 
@@ -168,9 +168,9 @@ void UPKInteractionComponent::RefreshCurrentTarget()
 	AActor* BestTarget = nullptr;
 	FPKInteractionRequest BestRequest;
 	int32 BestPriority = MIN_int32;
-	float BestDistanceSquared = TNumericLimits<float>::Max();
+	float BestDistanceSquared = TNumericLimits<float>::Max();	//最大有限正数
 	const FVector InteractorLocation = Interactor->GetActorLocation();
-	const float RangeSquared = FMath::Square(InteractionRange);
+	const float RangeSquared = FMath::Square(InteractionRange);		//距离的平方
 
 	for (AActor* Candidate : InteractableActors)
 	{
@@ -210,12 +210,12 @@ void UPKInteractionComponent::RefreshCurrentTarget()
 		}
 	}
 
-	if (bInteractionPressed && BestTarget != CurrentTarget)
+	if (bInteractionPressed && BestTarget != CurrentTarget)		//还在按着，BestTarget已经改变
 	{
-		EndInteraction(true);
+		EndInteraction(true);	//强制打断交互
 	}
 
-	SetCurrentTarget(BestTarget, BestRequest);
+	SetCurrentTarget(BestTarget, BestRequest);	//设置新交互Target
 }
 
 void UPKInteractionComponent::SetCurrentTarget(AActor* NewTarget,const FPKInteractionRequest& NewRequest)
