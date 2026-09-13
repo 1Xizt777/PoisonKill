@@ -6,6 +6,7 @@
 #include "PlayerCharacter.generated.h"
 
 class UCameraComponent;
+class UPKInteractionComponent;
 class UPKInventoryComponent;
 class USpringArmComponent;
 
@@ -26,6 +27,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Inventory", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPKInventoryComponent> InventoryComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Interaction", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UPKInteractionComponent> InteractionComponent;
 
 
 	UPROPERTY(VisibleAnywhere)

@@ -9,6 +9,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter
 )
 
+
 bool FPKInventoryComponentTest::RunTest(const FString& Parameters)
 {
 	UPKInventoryComponent* Inventory = NewObject<UPKInventoryComponent>();

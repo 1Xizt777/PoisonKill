@@ -21,10 +21,7 @@ void UPKGameplayDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	LoadTable(RecipeTablePath, RecipeTable, TEXT("Recipe"));
 }
 
-bool UPKGameplayDataSubsystem::GetPoisonDefinition(
-	const FName RowName,
-	FPKPoisonDefinition& OutDefinition
-) const
+bool UPKGameplayDataSubsystem::GetPoisonDefinition(const FName RowName,FPKPoisonDefinition& OutDefinition) const
 {
 	if (!PoisonTable)
 	{
@@ -45,10 +42,7 @@ bool UPKGameplayDataSubsystem::GetPoisonDefinition(
 	return true;
 }
 
-bool UPKGameplayDataSubsystem::GetCarrierDefinition(
-	const FName RowName,
-	FPKCarrierDefinition& OutDefinition
-) const
+bool UPKGameplayDataSubsystem::GetCarrierDefinition(const FName RowName,FPKCarrierDefinition& OutDefinition) const
 {
 	if (!CarrierTable)
 	{
@@ -69,10 +63,7 @@ bool UPKGameplayDataSubsystem::GetCarrierDefinition(
 	return true;
 }
 
-bool UPKGameplayDataSubsystem::GetNpcDefinition(
-	const FName RowName,
-	FPKNpcDefinition& OutDefinition
-) const
+bool UPKGameplayDataSubsystem::GetNpcDefinition(const FName RowName,FPKNpcDefinition& OutDefinition) const
 {
 	if (!NpcTable)
 	{
@@ -93,10 +84,7 @@ bool UPKGameplayDataSubsystem::GetNpcDefinition(
 	return true;
 }
 
-bool UPKGameplayDataSubsystem::GetRecipeDefinition(
-	const FName RowName,
-	FPKRecipeDefinition& OutDefinition
-) const
+bool UPKGameplayDataSubsystem::GetRecipeDefinition(const FName RowName,FPKRecipeDefinition& OutDefinition) const
 {
 	if (!RecipeTable)
 	{
@@ -117,10 +105,7 @@ bool UPKGameplayDataSubsystem::GetRecipeDefinition(
 	return true;
 }
 
-bool UPKGameplayDataSubsystem::GetRecipeForPoison(
-	const FName OutputPoisonId,
-	FPKRecipeDefinition& OutDefinition
-) const
+bool UPKGameplayDataSubsystem::GetRecipeForPoison(const FName OutputPoisonId,FPKRecipeDefinition& OutDefinition) const
 {
 	if (!RecipeTable)
 	{
@@ -160,11 +145,7 @@ TArray<FName> UPKGameplayDataSubsystem::GetRecipeRowNames() const
 	return RecipeTable ? RecipeTable->GetRowNames() : TArray<FName>();
 }
 
-bool UPKGameplayDataSubsystem::LoadTable(
-	const FSoftObjectPath& Path,
-	TObjectPtr<UDataTable>& OutTable,
-	const TCHAR* DebugName
-)
+bool UPKGameplayDataSubsystem::LoadTable(const FSoftObjectPath& Path,TObjectPtr<UDataTable>& OutTable,const TCHAR* DebugName)
 {
 	if (!Path.IsValid())
 	{

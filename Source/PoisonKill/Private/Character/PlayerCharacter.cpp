@@ -3,6 +3,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Interaction/PKInteractionComponent.h"
 #include "Items/PKInventoryComponent.h"
 
 
@@ -18,6 +19,9 @@ APlayerCharacter::APlayerCharacter()
 
 	
 	InventoryComponent = CreateDefaultSubobject<UPKInventoryComponent>(TEXT("InventoryComponent"));
+
+	
+	InteractionComponent = CreateDefaultSubobject<UPKInteractionComponent>(TEXT("InteractionComponent"));
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());

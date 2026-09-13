@@ -16,10 +16,12 @@ class POISONKILL_API UPKGameplayDataSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	
 	UPKGameplayDataSubsystem();
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+	//FName 查一行，并复制到输出结构体
 	UFUNCTION(BlueprintCallable, Category = "PK|Data")
 	bool GetPoisonDefinition(FName RowName, FPKPoisonDefinition& OutDefinition) const;
 
@@ -32,9 +34,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PK|Data")
 	bool GetRecipeDefinition(FName RowName, FPKRecipeDefinition& OutDefinition) const;
 
-	UFUNCTION(BlueprintCallable, Category = "PK|Data")
-	bool GetRecipeForPoison(FName OutputPoisonId, FPKRecipeDefinition& OutDefinition) const;
 
+	UFUNCTION(BlueprintCallable, Category = "PK|Data")
+	bool GetRecipeForPoison(FName OutputPoisonId, FPKRecipeDefinition& OutDefinition) const;		//通过原料获取毒物
+
+	
+	//用于遍历所有配置
 	UFUNCTION(BlueprintPure, Category = "PK|Data")
 	TArray<FName> GetPoisonRowNames() const;
 
@@ -48,6 +53,9 @@ public:
 	TArray<FName> GetRecipeRowNames() const;
 
 private:
+	
+	
+	//四个定义路径在DefaultGame.ini了
 	UPROPERTY(Config, EditAnywhere, Category = "PK|Data")
 	FSoftObjectPath PoisonTablePath;
 
@@ -60,6 +68,7 @@ private:
 	UPROPERTY(Config, EditAnywhere, Category = "PK|Data")
 	FSoftObjectPath RecipeTablePath;
 
+	
 	UPROPERTY(Transient)
 	TObjectPtr<UDataTable> PoisonTable;
 
