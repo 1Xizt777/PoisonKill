@@ -1,6 +1,8 @@
 #include "World/PKCarrierActor.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Components/SphereComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Data/PKGameplayDataSubsystem.h"
 #include "Data/PKGameplayTypes.h"
 #include "Effects/PKPoisonVictimComponent.h"
@@ -15,6 +17,14 @@ APKCarrierActor::APKCarrierActor()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	SetRootComponent(Mesh);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	TouchCollision = CreateDefaultSubobject<USphereComponent>(TEXT("TouchCollision"));
+	TouchCollision->SetupAttachment(GetRootComponent());
+	TouchCollision->SetSphereRadius(80.0f);
+	TouchCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	TouchCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	TouchCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	TouchCollision->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleTouchBeginOverlap);
+	TouchCollision->OnComponentEndOverlap.AddDynamic(this, &ThisClass::HandleTouchEndOverlap);
 	IngestionPrompt = NSLOCTEXT("PKCarrierActor", "DefaultIngestionPrompt", "Add {0}");
 	ContactPrompt = NSLOCTEXT("PKCarrierActor", "DefaultContactPrompt", "Apply {0}");
 }
@@ -165,6 +175,23 @@ bool APKCarrierActor::UseCarrier(APawn* User)
 	return false;
 }
 
+void APKCarrierActor::HandleTouchBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	APlayerController* PlayerController = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+	APawn* PlayerPawn = PlayerController ? PlayerController->GetPawn() : nullptr;
+	if (!PlayerPawn || OtherActor != PlayerPawn || TouchingActors.Contains(OtherActor))
+	{
+		return;
+	}
+
+	TouchingActors.Add(OtherActor);
+	ApplyContactDose(PlayerPawn);
+}
+
+void APKCarrierActor::HandleTouchEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	TouchingActors.Remove(OtherActor);
+}
 UPKGameplayDataSubsystem* APKCarrierActor::GetDataSubsystem() const
 {
 	UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr;

@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Interaction/PKInteractionComponent.h"
 #include "Items/PKInventoryComponent.h"
+#include "Effects/PKPoisonVictimComponent.h"
 
 
 APlayerCharacter::APlayerCharacter()
@@ -22,6 +23,8 @@ APlayerCharacter::APlayerCharacter()
 
 	
 	InteractionComponent = CreateDefaultSubobject<UPKInteractionComponent>(TEXT("InteractionComponent"));
+
+	PoisonVictimComponent = CreateDefaultSubobject<UPKPoisonVictimComponent>(TEXT("PoisonVictimComponent"));
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());

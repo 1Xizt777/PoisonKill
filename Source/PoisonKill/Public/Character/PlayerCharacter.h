@@ -6,6 +6,8 @@
 #include "PlayerCharacter.generated.h"
 
 class UCameraComponent;
+
+class UPKPoisonVictimComponent;
 class UPKInteractionComponent;
 class UPKInventoryComponent;
 class USpringArmComponent;
@@ -19,6 +21,9 @@ public:
 
 	APlayerCharacter();
 
+	UFUNCTION(BlueprintPure, Category = "PK|Poison")
+	UPKPoisonVictimComponent* GetPoisonVictimComponent() const { return PoisonVictimComponent; }
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -30,6 +35,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Interaction", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPKInteractionComponent> InteractionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Poison", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UPKPoisonVictimComponent> PoisonVictimComponent;
 
 
 	UPROPERTY(VisibleAnywhere)

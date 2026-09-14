@@ -7,6 +7,10 @@
 #include "PKCarrierActor.generated.h"
 
 class UStaticMeshComponent;
+
+class USphereComponent;
+class UPrimitiveComponent;
+struct FHitResult;
 class UPKGameplayDataSubsystem;
 class UPKInventoryComponent;
 class UPKPoisonVictimComponent;
@@ -65,6 +69,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Carrier")
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Carrier")
+	TObjectPtr<USphereComponent> TouchCollision;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PK|Carrier")
 	FName CarrierId = TEXT("Carrier_SoupPot");
 
@@ -93,6 +100,11 @@ private:
 	static float CalculateContactDose(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier);
 	static bool ShouldDetectPoison(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier);
 	void ApplyPayload(FName PoisonId, float SingleDose, int32 ResidueHits, AActor* AppliedBy);
+	UFUNCTION()
+	void HandleTouchBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void HandleTouchEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	TSet<TWeakObjectPtr<AActor>> TouchingActors;
 
 	friend struct FPKCarrierActorTestAccessor;
 };
