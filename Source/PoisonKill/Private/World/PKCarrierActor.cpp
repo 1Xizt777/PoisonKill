@@ -31,7 +31,7 @@ APKCarrierActor::APKCarrierActor()
 
 void APKCarrierActor::ClearPayload()
 {
-	if (Payload.IsEmpty())
+	if (Payload.PoisonId.IsNone() && Payload.RemainingDose <= 0.0f && Payload.RemainingResidueHits <= 0)
 	{
 		return;
 	}
