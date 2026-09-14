@@ -9,6 +9,7 @@
 class UStaticMeshComponent;
 class UPKGameplayDataSubsystem;
 class UPKInventoryComponent;
+class UPKPoisonVictimComponent;
 struct FPKCarrierDefinition;
 struct FPKPoisonDefinition;
 
@@ -45,6 +46,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PK|Carrier")
 	void ClearPayload();
 
+	UFUNCTION(BlueprintCallable, Category = "PK|Carrier")
+	float ConsumeIngestion(APawn* Consumer);
+
+	UFUNCTION(BlueprintCallable, Category = "PK|Carrier")
+	float ApplyContactDose(APawn* Toucher);
+
 	virtual bool CanInteract_Implementation(APawn* Interactor, FPKInteractionRequest& OutRequest) override;
 	virtual void OnInteractionStarted_Implementation(APawn* Interactor) override;
 	virtual void OnInteractionProgressUpdated_Implementation(APawn* Interactor, float NormalizedProgress) override;
@@ -76,10 +83,12 @@ protected:
 private:
 	UPKGameplayDataSubsystem* GetDataSubsystem() const;
 	UPKInventoryComponent* GetInventoryComponent(APawn* Interactor) const;
+	UPKPoisonVictimComponent* GetVictimComponent(APawn* Pawn) const;
 	bool GetCarrierDefinition(FPKCarrierDefinition& OutDefinition) const;
 	bool GetSelectedPoison(APawn* Interactor, FName& OutPoisonId, FPKPoisonDefinition& OutDefinition) const;
 	static bool IsPoisonAllowed(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier);
-	void ApplyPayload(FName PoisonId, float SingleDose, int32 ResidueHits);
+	static float CalculateContactDose(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier);
+	void ApplyPayload(FName PoisonId, float SingleDose, int32 ResidueHits, AActor* AppliedBy);
 
 	friend struct FPKCarrierActorTestAccessor;
 };

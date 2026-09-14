@@ -11,9 +11,14 @@ struct FPKCarrierActorTestAccessor
 		return APKCarrierActor::IsPoisonAllowed(Poison, Carrier);
 	}
 
-	static void Apply(APKCarrierActor& CarrierState, FName PoisonId, float SingleDose, int32 ResidueHits)
+	static float ContactDose(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier)
 	{
-		CarrierState.ApplyPayload(PoisonId, SingleDose, ResidueHits);
+		return APKCarrierActor::CalculateContactDose(Poison, Carrier);
+	}
+
+	static void Apply(APKCarrierActor& CarrierState, FName PoisonId, float SingleDose, int32 ResidueHits, AActor* Instigator)
+	{
+		CarrierState.ApplyPayload(PoisonId, SingleDose, ResidueHits, Instigator);
 	}
 };
 
@@ -45,18 +50,10 @@ bool FPKCarrierActorTest::RunTest(const FString& Parameters)
 		EPKCarrierType::Contact
 	};
 
-	TestTrue(
-		TEXT("Hemlock can be applied to ingestion carriers"),
-		FPKCarrierActorTestAccessor::IsAllowed(Hemlock, IngestionCarrier)
-	);
-	TestFalse(
-		TEXT("Hemlock cannot be applied to contact carriers"),
-		FPKCarrierActorTestAccessor::IsAllowed(Hemlock, ContactCarrier)
-	);
-	TestTrue(
-		TEXT("Lead sugar can be applied to both carrier types"),
-		FPKCarrierActorTestAccessor::IsAllowed(LeadSugar, ContactCarrier)
-	);
+	TestTrue(TEXT("Hemlock can be applied to ingestion carriers"), FPKCarrierActorTestAccessor::IsAllowed(Hemlock, IngestionCarrier));
+	TestFalse(TEXT("Hemlock cannot be applied to contact carriers"), FPKCarrierActorTestAccessor::IsAllowed(Hemlock, ContactCarrier));
+	TestTrue(TEXT("Lead sugar can be applied to both carrier types"), FPKCarrierActorTestAccessor::IsAllowed(LeadSugar, ContactCarrier));
+	TestEqual(TEXT("Contact dose uses carrier coefficient"), FPKCarrierActorTestAccessor::ContactDose(LeadSugar, ContactCarrier), 0.5f);
 
 	APKCarrierActor* Carrier = NewObject<APKCarrierActor>(
 		GetTransientPackage(),
@@ -68,40 +65,13 @@ bool FPKCarrierActorTest::RunTest(const FString& Parameters)
 		return false;
 	}
 
-	FPKCarrierActorTestAccessor::Apply(
-		*Carrier,
-		TEXT("Poison_LeadSugar"),
-		1.0f,
-		3
-	);
-	FPKCarrierActorTestAccessor::Apply(
-		*Carrier,
-		TEXT("Poison_LeadSugar"),
-		1.0f,
-		3
-	);
-	TestEqual(
-		TEXT("Repeated poison application accumulates dose"),
-		Carrier->GetPayload().RemainingDose,
-		2.0f
-	);
+	FPKCarrierActorTestAccessor::Apply(*Carrier, TEXT("Poison_LeadSugar"), 1.0f, 3, nullptr);
+	FPKCarrierActorTestAccessor::Apply(*Carrier, TEXT("Poison_LeadSugar"), 1.0f, 3, nullptr);
+	TestEqual(TEXT("Repeated poison application accumulates dose"), Carrier->GetPayload().RemainingDose, 2.0f);
 
-	FPKCarrierActorTestAccessor::Apply(
-		*Carrier,
-		TEXT("Poison_Hemlock"),
-		4.0f,
-		1
-	);
-	TestEqual(
-		TEXT("Different poison overwrites the payload"),
-		Carrier->GetPayload().PoisonId,
-		FName(TEXT("Poison_Hemlock"))
-	);
-	TestEqual(
-		TEXT("Residue count resets from carrier config"),
-		Carrier->GetPayload().RemainingResidueHits,
-		1
-	);
+	FPKCarrierActorTestAccessor::Apply(*Carrier, TEXT("Poison_Hemlock"), 4.0f, 1, nullptr);
+	TestEqual(TEXT("Different poison overwrites the payload"), Carrier->GetPayload().PoisonId, FName(TEXT("Poison_Hemlock")));
+	TestEqual(TEXT("Residue count resets from carrier config"), Carrier->GetPayload().RemainingResidueHits, 1);
 
 	Carrier->ClearPayload();
 	TestFalse(TEXT("Carrier payload can be cleared"), Carrier->HasPayload());

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+class AActor;
 #include "PKCarrierTypes.generated.h"
 
 USTRUCT(BlueprintType)
@@ -16,6 +17,9 @@ struct POISONKILL_API FPKCarrierPayload
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Carrier", meta = (ClampMin = "0"))
 	int32 RemainingResidueHits = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Carrier")
+	TObjectPtr<AActor> Instigator;
 
 	bool IsEmpty() const { return PoisonId.IsNone() || RemainingDose <= 0.0f; }
 };
