@@ -5,6 +5,8 @@
 #include "Data/PKGameplayTypes.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UPKPoisonVictimComponent::UPKPoisonVictimComponent()
 {
@@ -75,7 +77,8 @@ void UPKPoisonVictimComponent::ApplyPoisonDose(FName PoisonId, float Dose, AActo
 		HasReachedWarningThreshold(TotalDose, Poison, Npc))
 	{
 		WarningTriggeredPoisons.Add(PoisonId);
-		OnPoisonWarningReached.Broadcast(PoisonId, TotalDose);
+		ApplyWarningFeedback(Npc);
+	OnPoisonWarningReached.Broadcast(PoisonId, TotalDose);
 		BP_OnPoisonWarningReached(PoisonId, TotalDose);
 	}
 
@@ -155,6 +158,23 @@ void UPKPoisonVictimComponent::KillFromPoison(FName PoisonId, AActor* Instigator
 	BP_OnPoisonDeath(PoisonId, Instigator);
 }
 
+void UPKPoisonVictimComponent::ApplyWarningFeedback(const FPKNpcDefinition& Npc)
+{
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	UCharacterMovementComponent* Movement = OwnerCharacter ? OwnerCharacter->GetCharacterMovement() : nullptr;
+	if (!Movement)
+	{
+		return;
+	}
+
+	if (!bBaseSpeedCached)
+	{
+		BaseMaxWalkSpeed = Movement->MaxWalkSpeed;
+		bBaseSpeedCached = true;
+	}
+
+	Movement->MaxWalkSpeed = BaseMaxWalkSpeed * Npc.WarningMoveSpeedScale;
+}
 float UPKPoisonVictimComponent::CalculateActualLethalThreshold(const FPKPoisonDefinition& Poison, const FPKNpcDefinition& Npc)
 {
 	return Poison.LethalThreshold * Npc.ThresholdCoefficient;

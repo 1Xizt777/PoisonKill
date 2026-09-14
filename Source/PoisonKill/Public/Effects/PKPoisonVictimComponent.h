@@ -108,6 +108,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "PK|Poison", meta = (AllowPrivateAccess = "true"))
 	bool bAlerted = false;
 
+	bool bBaseSpeedCached = false;
+	float BaseMaxWalkSpeed = 0.0f;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "PK|Poison")
 	void BP_OnPoisonDoseReceived(FName PoisonId, float TotalDose, float ActualLethalThreshold);
 
@@ -132,6 +135,8 @@ private:
 	void ApplyPoisonDose(FName PoisonId, float Dose, AActor* Instigator, const FPKPoisonDefinition& Poison, const FPKNpcDefinition& Npc);
 	void HandleIncubationExpired(FName PoisonId);
 	void KillFromPoison(FName PoisonId, AActor* Instigator);
+
+	void ApplyWarningFeedback(const FPKNpcDefinition& Npc);
 
 	static float CalculateActualLethalThreshold(const FPKPoisonDefinition& Poison, const FPKNpcDefinition& Npc);
 	static float CalculateWarningThreshold(const FPKPoisonDefinition& Poison, const FPKNpcDefinition& Npc);
