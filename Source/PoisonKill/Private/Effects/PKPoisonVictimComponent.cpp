@@ -1,4 +1,5 @@
 #include "Effects/PKPoisonVictimComponent.h"
+#include "Effects/PKPoisonAttributionSubsystem.h"
 
 #include "Data/PKGameplayDataSubsystem.h"
 #include "Data/PKGameplayTypes.h"
@@ -140,6 +141,14 @@ void UPKPoisonVictimComponent::KillFromPoison(FName PoisonId, AActor* Instigator
 	for (TPair<FName, FTimerHandle>& TimerPair : IncubationTimers)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(TimerPair.Value);
+	}
+
+	if (UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr)
+	{
+		if (UPKPoisonAttributionSubsystem* Attribution = GameInstance->GetSubsystem<UPKPoisonAttributionSubsystem>())
+		{
+			Attribution->RecordPoisonDeath(GetOwner(), PoisonId, Instigator);
+		}
 	}
 
 	OnPoisonDeath.Broadcast(PoisonId, Instigator);
