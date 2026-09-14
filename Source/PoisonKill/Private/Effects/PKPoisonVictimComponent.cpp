@@ -99,7 +99,7 @@ void UPKPoisonVictimComponent::ApplyPoisonDose(FName PoisonId, float Dose, AActo
 		{
 			return;
 		}
-	}
+	}	
 
 	FTimerHandle NewTimer;
 	GetWorld()->GetTimerManager().SetTimer(

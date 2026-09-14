@@ -15,6 +15,11 @@ bool AEnemyCharacter::GetIsEquipedWeapon_Implementation()
 	return IsEquipedWeapon;
 }
 
+UPKPoisonVictimComponent* AEnemyCharacter::GetPoisonVictimComponent_Implementation()
+{
+	return PoisonVictimComponent;
+}
+
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();

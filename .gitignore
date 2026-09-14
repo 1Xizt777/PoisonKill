@@ -1,6 +1,7 @@
 # Unreal Engine generated output
 Binaries/
 Build/
+Packaged/
 DerivedDataCache/
 Intermediate/
 Saved/

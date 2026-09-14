@@ -7,6 +7,9 @@
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "Items/PKInventoryComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 APKProcessingStation::APKProcessingStation()
 {
@@ -60,6 +63,7 @@ bool APKProcessingStation::CanInteract_Implementation(APawn* Interactor, FPKInte
 void APKProcessingStation::OnInteractionStarted_Implementation(APawn* Interactor)
 {
 	BP_OnProcessingStarted();
+	StartProcessingEffect();
 }
 
 void APKProcessingStation::OnInteractionProgressUpdated_Implementation(APawn* Interactor, float NormalizedProgress)
@@ -73,6 +77,7 @@ void APKProcessingStation::OnInteractionCompleted_Implementation(APawn* Interact
 	UPKInventoryComponent* Inventory = GetInventoryComponent(Interactor);
 	if (!DataSubsystem || !Inventory)
 	{
+		StopProcessingEffect();
 		return;
 	}
 
@@ -81,6 +86,7 @@ void APKProcessingStation::OnInteractionCompleted_Implementation(APawn* Interact
 	if (!DataSubsystem->GetRecipeDefinition(RecipeId, Recipe) ||
 		!DataSubsystem->GetPoisonDefinition(Recipe.OutputPoisonId, Poison))
 	{
+		StopProcessingEffect();
 		return;
 	}
 
@@ -88,11 +94,14 @@ void APKProcessingStation::OnInteractionCompleted_Implementation(APawn* Interact
 	{
 		BP_OnProcessingCompleted(Recipe.OutputPoisonId);
 	}
+
+	StopProcessingEffect();
 }
 
 void APKProcessingStation::OnInteractionCanceled_Implementation(APawn* Interactor)
 {
 	BP_OnProcessingCanceled();
+	StopProcessingEffect();
 }
 
 UPKGameplayDataSubsystem* APKProcessingStation::GetDataSubsystem() const
@@ -134,4 +143,36 @@ bool APKProcessingStation::ApplyRecipe(const FPKRecipeDefinition& Recipe, UPKInv
 	}
 
 	return true;
+}
+
+void APKProcessingStation::StartProcessingEffect()
+{
+	if (!ProcessingNiagaraSystem || !Mesh)
+	{
+		return;
+	}
+
+	if (ProcessingNiagaraComponent && ProcessingNiagaraComponent->IsActive())
+	{
+		return;
+	}
+
+	ProcessingNiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+		ProcessingNiagaraSystem,
+		Mesh,
+		NAME_None,
+		FVector::ZeroVector,
+		FRotator::ZeroRotator,
+		EAttachLocation::KeepRelativeOffset,
+		true
+	);
+}
+
+void APKProcessingStation::StopProcessingEffect()
+{
+	if (ProcessingNiagaraComponent)
+	{
+		ProcessingNiagaraComponent->DestroyComponent();
+		ProcessingNiagaraComponent = nullptr;
+	}
 }

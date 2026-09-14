@@ -1,11 +1,11 @@
-
-
 #include "Player/PK_PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/Character.h"
 #include "Interaction/PKInteractionComponent.h"
+#include "Items/PKInventoryComponent.h"
 #include "UI/PKInteractionPromptWidget.h"
+#include "UI/PKInventoryHudWidget.h"
 
 void APK_PlayerController::BeginPlay()
 {
@@ -18,6 +18,7 @@ void APK_PlayerController::BeginPlay()
 	}
 
 	RefreshInteractionPrompt(GetInteractionComponent());
+	RefreshInventoryHud(GetInventoryComponent());
 }
 
 void APK_PlayerController::SetupInputComponent()
@@ -31,10 +32,11 @@ void APK_PlayerController::SetupInputComponent()
 		PKInputComponent->BindAction(LookAction,ETriggerEvent::Triggered,this,&ThisClass::Input_Look);
 		PKInputComponent->BindAction(JumpAction,ETriggerEvent::Started,this,&ThisClass::Input_Jump);
 		
-		
 		PKInputComponent->BindAction(InteractAction,ETriggerEvent::Started,this,&ThisClass::Input_InteractStarted);
 		PKInputComponent->BindAction(InteractAction,ETriggerEvent::Completed,this,&ThisClass::Input_InteractCanceled);
 		PKInputComponent->BindAction(InteractAction,ETriggerEvent::Canceled,this,&ThisClass::Input_InteractCanceled);
+
+		PKInputComponent->BindAction(SwitchItemAction,ETriggerEvent::Started,this,&ThisClass::Input_NextItem);
 	}
 }
 
@@ -43,10 +45,12 @@ void APK_PlayerController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 	
 	InteractionComponent = IsValid(InPawn)? InPawn->FindComponentByClass<UPKInteractionComponent>(): nullptr;
+	InventoryComponent = IsValid(InPawn)? InPawn->FindComponentByClass<UPKInventoryComponent>(): nullptr;
 
 	if (HasActorBegunPlay())
 	{
 		RefreshInteractionPrompt(InteractionComponent.Get());
+		RefreshInventoryHud(InventoryComponent.Get());
 	}
 }
 
@@ -58,17 +62,22 @@ void APK_PlayerController::OnUnPossess()
 	}
 
 	RemoveInteractionPrompt();
-	InteractionComponent.Reset();	//back to the null，回到空指针
+	InteractionComponent.Reset();
+
+	RemoveInventoryHud();
+	InventoryComponent.Reset();
 	
-	
-	//在流程之前取消交互，reset指针
-	
-	Super::OnUnPossess();	//执行 PlayerController 基类的“解除 Pawn 关系”流程，
+	Super::OnUnPossess();
 }
 
 UPKInteractionComponent* APK_PlayerController::GetInteractionComponent() const
 {
 	return InteractionComponent.Get();
+}
+
+UPKInventoryComponent* APK_PlayerController::GetInventoryComponent() const
+{
+	return InventoryComponent.Get();
 }
 
 bool APK_PlayerController::IsInteractionLocked() const
@@ -80,6 +89,7 @@ bool APK_PlayerController::IsInteractionLocked() const
 void APK_PlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	RemoveInteractionPrompt();
+	RemoveInventoryHud();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -127,15 +137,58 @@ void APK_PlayerController::RemoveInteractionPrompt()
 	InteractionPromptWidget = nullptr;
 }
 
+void APK_PlayerController::RefreshInventoryHud(UPKInventoryComponent* NewComponent)
+{
+	if (!InventoryHudWidgetClass)
+	{
+		return;
+	}
+
+	if (!InventoryHudWidget)
+	{
+		InventoryHudWidget = CreateWidget<UPKInventoryHudWidget>(this,InventoryHudWidgetClass);
+	}
+
+	if (!InventoryHudWidget)
+	{
+		return;
+	}
+
+	InventoryHudWidget->SetInventoryComponent(NewComponent);
+
+	if (NewComponent)
+	{
+		if (!InventoryHudWidget->IsInViewport())
+		{
+			InventoryHudWidget->AddToViewport();
+		}
+	}
+	else
+	{
+		InventoryHudWidget->RemoveFromParent();
+	}
+}
+
+void APK_PlayerController::RemoveInventoryHud()
+{
+	if (!InventoryHudWidget)
+	{
+		return;
+	}
+
+	InventoryHudWidget->SetInventoryComponent(nullptr);
+	InventoryHudWidget->RemoveFromParent();
+	InventoryHudWidget = nullptr;
+}
+
 void APK_PlayerController::Input_Move(const FInputActionValue& InputActionValue)
 {
-	if (IsInteractionLocked()) return;	//交互锁定则直接返回
+	if (IsInteractionLocked()) return;
 	
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 	
 	const FRotator Rotation = GetControlRotation();
 	const FRotator YawRotation(0.f,Rotation.Yaw,0.f);
-	
 	
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
@@ -149,28 +202,35 @@ void APK_PlayerController::Input_Move(const FInputActionValue& InputActionValue)
 
 void APK_PlayerController::Input_Look(const FInputActionValue& InputActionValue)
 {
-	if (IsInteractionLocked()) return;	//交互锁定则直接返回
+	// if (IsInteractionLocked()) return;
 	
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 	
 	AddYawInput(InputAxisVector.X);
 	AddPitchInput(InputAxisVector.Y);
-	
 }
 
 void APK_PlayerController::Input_Jump()
 {
-	if (IsInteractionLocked()) return;	//交互锁定则直接返回
+	if (IsInteractionLocked()) return;
 	
 	if (!IsValid(GetCharacter())) return;
 	
 	GetCharacter()->Jump();
+}
+
+void APK_PlayerController::Input_NextItem()
+{
+	if (IsInteractionLocked()) return;
 	
+	if (UPKInventoryComponent* Component = GetInventoryComponent())
+	{
+		Component->CycleSelectedItem(1);
+	}
 }
 
 void APK_PlayerController::Input_InteractStarted()
 {
-	// GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,TEXT("Input_InteractStarted"));
 	if (UPKInteractionComponent* Component = GetInteractionComponent())
 	{
 		Component->BeginInteraction();
@@ -179,7 +239,6 @@ void APK_PlayerController::Input_InteractStarted()
 
 void APK_PlayerController::Input_InteractCanceled()
 {
-	// GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,TEXT("Input_InteractCanceled"));
 	if (UPKInteractionComponent* Component = GetInteractionComponent())
 	{
 		Component->EndInteraction();

@@ -8,6 +8,8 @@
 
 class UPKInteractionComponent;
 class UPKInteractionPromptWidget;
+class UPKInventoryComponent;
+class UPKInventoryHudWidget;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
@@ -36,14 +38,26 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UPKInteractionPromptWidget> InteractionPromptWidget;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category = "PK|UI")
+	TSubclassOf<UPKInventoryHudWidget> InventoryHudWidgetClass;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UPKInventoryHudWidget> InventoryHudWidget;
 	
 	TWeakObjectPtr<UPKInteractionComponent> InteractionComponent;
+	TWeakObjectPtr<UPKInventoryComponent> InventoryComponent;
 	
 	UFUNCTION(BlueprintPure, Category = "PK|Interaction")
 	UPKInteractionComponent* GetInteractionComponent() const;
+
+	UFUNCTION(BlueprintPure, Category = "PK|Inventory")
+	UPKInventoryComponent* GetInventoryComponent() const;
+
 	void RefreshInteractionPrompt(UPKInteractionComponent* NewComponent);
 	void RemoveInteractionPrompt();
+	void RefreshInventoryHud(UPKInventoryComponent* NewComponent);
+	void RemoveInventoryHud();
 	
 	bool IsInteractionLocked() const;
 	
@@ -61,10 +75,14 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "PK|Input")
 	TObjectPtr<UInputAction> InteractAction;
+
+	UPROPERTY(EditAnywhere, Category = "PK|Input")
+	TObjectPtr<UInputAction> SwitchItemAction;
 	
 	void Input_Move(const FInputActionValue& InputActionValue);
 	void Input_Look(const FInputActionValue& InputActionValue);
 	void Input_Jump();
+	void Input_NextItem();
 	
 	void Input_InteractStarted();
 	void Input_InteractCanceled();

@@ -58,7 +58,6 @@ void UPKInteractionPromptWidget::HandleInteractionProgressChanged(AActor* Target
 void UPKInteractionPromptWidget::HandleInteractionCompleted(AActor* Target)
 {
 	BP_HandleInteractionCompleted(Target);
-	GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Yellow,TEXT("HandleInteractionCompleted"));
 }
 
 void UPKInteractionPromptWidget::HandleInteractionCanceled(AActor* Target)

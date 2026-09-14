@@ -9,6 +9,8 @@
 class UStaticMeshComponent;
 class UPKGameplayDataSubsystem;
 class UPKInventoryComponent;
+class UNiagaraComponent;
+class UNiagaraSystem;
 struct FPKRecipeDefinition;
 
 UCLASS(Blueprintable)
@@ -56,11 +58,19 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "PK|Processing")
 	void BP_OnProcessingCanceled();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PK|Processing|VFX")
+	TObjectPtr<UNiagaraSystem> ProcessingNiagaraSystem;
+
 private:
+	UPROPERTY(Transient)
+	TObjectPtr<UNiagaraComponent> ProcessingNiagaraComponent;
+
 	UPKGameplayDataSubsystem* GetDataSubsystem() const;
 	UPKInventoryComponent* GetInventoryComponent(APawn* Interactor) const;
 	static bool CanApplyRecipe(const FPKRecipeDefinition& Recipe, const UPKInventoryComponent* Inventory);
 	static bool ApplyRecipe(const FPKRecipeDefinition& Recipe, UPKInventoryComponent* Inventory);
+	void StartProcessingEffect();
+	void StopProcessingEffect();
 
 	friend struct FPKProcessingStationTestAccessor;
 };

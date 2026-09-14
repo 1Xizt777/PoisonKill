@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -24,6 +23,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "PK|Poison")
 	UPKPoisonVictimComponent* GetPoisonVictimComponent() const { return PoisonVictimComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "PK|Inventory")
+	UPKInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -39,10 +41,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Poison", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UPKPoisonVictimComponent> PoisonVictimComponent;
 
-
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArm;
-	
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> FollowCamera;
 };

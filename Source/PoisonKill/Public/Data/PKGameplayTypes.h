@@ -28,7 +28,7 @@ struct POISONKILL_API FPKPoisonDefinition : public FTableRowBase  //毒物定义
 	FText DisplayName;  
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Poison", meta = (ClampMin = "0.0"))
-	float SingleDose = 0.0f;		//单剂量
+	float SingleDose = 0.0f;		//单次施用剂量
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Poison", meta = (ClampMin = "0.0"))
 	float LethalThreshold = 0.0f;		//致死阈值
@@ -61,7 +61,7 @@ struct POISONKILL_API FPKCarrierDefinition : public FTableRowBase	//载体定义
 	float DoseCoefficient = 1.0f;		//剂量系数
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Carrier", meta = (ClampMin = "1"))
-	int32 DefaultResidueHits = 3;		//残留次数，被触碰该次数后才清除。默认 3 次（输入型1次）
+	int32 DefaultResidueHits = 3;		//残留次数，被触碰该次数后才清除。默认 3 次（摄入型1次）
 };
 
 USTRUCT(BlueprintType)

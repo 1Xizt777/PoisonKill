@@ -24,5 +24,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent , BlueprintCallable)
 	bool GetIsEquipedWeapon();
 	
+	UFUNCTION(BlueprintNativeEvent , BlueprintCallable)
+	UPKPoisonVictimComponent* GetPoisonVictimComponent();
 	
 };

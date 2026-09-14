@@ -15,14 +15,14 @@ class POISONKILL_API AEnemyCharacter : public ABaseCharacter, public IEnemyInter
 public:
 	AEnemyCharacter();
 
-	UFUNCTION(BlueprintPure, Category = "PK|Poison")
-	UPKPoisonVictimComponent* GetPoisonVictimComponent() const { return PoisonVictimComponent; }
+	// UFUNCTION(BlueprintPure, Category = "PK|Poison")
+	// UPKPoisonVictimComponent* GetPoisonVictimComponent() const { return PoisonVictimComponent; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "PK|Weapon")
 	bool IsEquipedWeapon;
 
 	virtual bool GetIsEquipedWeapon_Implementation() override;
-
+	virtual UPKPoisonVictimComponent* GetPoisonVictimComponent_Implementation() override;
 protected:
 	virtual void BeginPlay() override;
 
