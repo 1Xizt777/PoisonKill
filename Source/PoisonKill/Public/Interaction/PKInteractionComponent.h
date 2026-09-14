@@ -92,6 +92,7 @@ private:
 	void SetCurrentTarget(AActor* NewTarget, const FPKInteractionRequest& NewRequest);
 	void CompleteInteraction();
 	void BroadcastProgress();	//广播进度函数
+	void AdvanceInteraction(float DeltaTime);
 
 	friend struct FPKInteractionComponentTestAccessor;
 };

@@ -11,7 +11,7 @@ struct FPKInteractionComponentTestAccessor
 		float DeltaTime
 	)
 	{
-		Component.TickComponent(DeltaTime, LEVELTICK_All, nullptr);
+		Component.AdvanceInteraction(DeltaTime);
 	}
 
 	static void SetTarget(

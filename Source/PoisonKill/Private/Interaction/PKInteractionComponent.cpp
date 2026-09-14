@@ -28,31 +28,34 @@ void UPKInteractionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void UPKInteractionComponent::TickComponent(const float DeltaTime , const ELevelTick TickType , FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	AdvanceInteraction(DeltaTime);
+}
 
+void UPKInteractionComponent::AdvanceInteraction(float DeltaTime)
+{
 	TargetRefreshElapsed += DeltaTime;
-	if (TargetRefreshElapsed >= TargetRefreshInterval)		//到达 0.1 秒就重新搜索目标
+	if (TargetRefreshElapsed >= TargetRefreshInterval)
 	{
 		TargetRefreshElapsed = 0.0f;
-		RefreshCurrentTarget();		//重新搜索目标
+		RefreshCurrentTarget();
 	}
 
-	if (!bInteractionPressed || !CurrentTarget)		//没长按直接返回
+	if (!bInteractionPressed || !CurrentTarget)
 	{
 		return;
 	}
 
-	ElapsedHoldTime += DeltaTime;	//在长按 ，已经按住的时间 += DeltaTime
-	BroadcastProgress();	//广播进度
+	ElapsedHoldTime += DeltaTime;
+	BroadcastProgress();
 
 	APawn* Interactor = Cast<APawn>(GetOwner());
-	IPKInteractable::Execute_OnInteractionProgressUpdated(CurrentTarget , Interactor , GetNormalizedProgress());		//广播正在长按
+	IPKInteractable::Execute_OnInteractionProgressUpdated(CurrentTarget, Interactor, GetNormalizedProgress());
 
-	if (ElapsedHoldTime >= CurrentRequest.HoldDuration)	//长按完成
+	if (ElapsedHoldTime >= CurrentRequest.HoldDuration)
 	{
-		CompleteInteraction();	//调用完成交互函数
+		CompleteInteraction();
 	}
 }
-
 bool UPKInteractionComponent::BeginInteraction()
 {
 	if (bInteractionPressed)	//如果已经按住，直接返回

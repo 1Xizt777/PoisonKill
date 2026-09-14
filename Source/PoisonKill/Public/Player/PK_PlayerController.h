@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,6 +7,7 @@
 #include "PK_PlayerController.generated.h"
 
 class UPKInteractionComponent;
+class UPKInteractionPromptWidget;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
@@ -27,11 +28,22 @@ protected:
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private:
+	
+	UPROPERTY(EditDefaultsOnly, Category = "PK|UI")
+	TSubclassOf<UPKInteractionPromptWidget> InteractionPromptWidgetClass;	//WidgetClass
+
+	UPROPERTY(Transient)
+	TObjectPtr<UPKInteractionPromptWidget> InteractionPromptWidget;
+	
 	
 	TWeakObjectPtr<UPKInteractionComponent> InteractionComponent;
 	
+	UFUNCTION(BlueprintPure, Category = "PK|Interaction")
 	UPKInteractionComponent* GetInteractionComponent() const;
+	void RefreshInteractionPrompt(UPKInteractionComponent* NewComponent);
+	void RemoveInteractionPrompt();
 	
 	bool IsInteractionLocked() const;
 	

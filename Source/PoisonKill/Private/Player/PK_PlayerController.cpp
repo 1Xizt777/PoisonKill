@@ -1,10 +1,11 @@
-﻿
+
 
 #include "Player/PK_PlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/Character.h"
 #include "Interaction/PKInteractionComponent.h"
+#include "UI/PKInteractionPromptWidget.h"
 
 void APK_PlayerController::BeginPlay()
 {
@@ -15,7 +16,8 @@ void APK_PlayerController::BeginPlay()
 	{
 		Subsystem->AddMappingContext(PKIMC,0.f);
 	}
-	
+
+	RefreshInteractionPrompt(GetInteractionComponent());
 }
 
 void APK_PlayerController::SetupInputComponent()
@@ -40,7 +42,12 @@ void APK_PlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	
-	InteractionComponent = IsValid(InPawn)? InPawn->FindComponentByClass<UPKInteractionComponent>() : nullptr;  //获取InteractComponent
+	InteractionComponent = IsValid(InPawn)? InPawn->FindComponentByClass<UPKInteractionComponent>(): nullptr;
+
+	if (HasActorBegunPlay())
+	{
+		RefreshInteractionPrompt(InteractionComponent.Get());
+	}
 }
 
 void APK_PlayerController::OnUnPossess()
@@ -50,6 +57,7 @@ void APK_PlayerController::OnUnPossess()
 		Component->CancelInteraction();
 	}
 
+	RemoveInteractionPrompt();
 	InteractionComponent.Reset();	//back to the null，回到空指针
 	
 	
@@ -67,6 +75,56 @@ bool APK_PlayerController::IsInteractionLocked() const
 {
 	const UPKInteractionComponent* Component = GetInteractionComponent();
 	return Component && Component->IsInteractionLocked();
+}
+
+void APK_PlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	RemoveInteractionPrompt();
+	Super::EndPlay(EndPlayReason);
+}
+
+void APK_PlayerController::RefreshInteractionPrompt(UPKInteractionComponent* NewComponent)
+{
+	if (!InteractionPromptWidgetClass)
+	{
+		return;
+	}
+
+	if (!InteractionPromptWidget)
+	{
+		InteractionPromptWidget = CreateWidget<UPKInteractionPromptWidget>(this,InteractionPromptWidgetClass);
+	}
+
+	if (!InteractionPromptWidget)
+	{
+		return;
+	}
+
+	InteractionPromptWidget->SetInteractionComponent(NewComponent);
+
+	if (NewComponent)
+	{
+		if (!InteractionPromptWidget->IsInViewport())
+		{
+			InteractionPromptWidget->AddToViewport();
+		}
+	}
+	else
+	{
+		InteractionPromptWidget->RemoveFromParent();
+	}
+}
+
+void APK_PlayerController::RemoveInteractionPrompt()
+{
+	if (!InteractionPromptWidget)
+	{
+		return;
+	}
+
+	InteractionPromptWidget->SetInteractionComponent(nullptr);
+	InteractionPromptWidget->RemoveFromParent();
+	InteractionPromptWidget = nullptr;
 }
 
 void APK_PlayerController::Input_Move(const FInputActionValue& InputActionValue)
@@ -112,7 +170,7 @@ void APK_PlayerController::Input_Jump()
 
 void APK_PlayerController::Input_InteractStarted()
 {
-	GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,TEXT("Input_InteractStarted"));
+	// GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,TEXT("Input_InteractStarted"));
 	if (UPKInteractionComponent* Component = GetInteractionComponent())
 	{
 		Component->BeginInteraction();
@@ -121,7 +179,7 @@ void APK_PlayerController::Input_InteractStarted()
 
 void APK_PlayerController::Input_InteractCanceled()
 {
-	GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,TEXT("Input_InteractCanceled"));
+	// GEngine->AddOnScreenDebugMessage(-1,3.f,FColor::Red,TEXT("Input_InteractCanceled"));
 	if (UPKInteractionComponent* Component = GetInteractionComponent())
 	{
 		Component->EndInteraction();
