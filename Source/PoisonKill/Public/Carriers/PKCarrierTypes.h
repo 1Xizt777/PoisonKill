@@ -21,5 +21,5 @@ struct POISONKILL_API FPKCarrierPayload
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Carrier")
 	TObjectPtr<AActor> Instigator;
 
-	bool IsEmpty() const { return PoisonId.IsNone() || RemainingDose <= 0.0f; }
+	bool IsEmpty() const { return PoisonId.IsNone() || RemainingDose <= 0.0f || RemainingResidueHits <= 0; }
 };
