@@ -1,5 +1,6 @@
 #include "Effects/PKPoisonAttributionSubsystem.h"
 
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
@@ -19,16 +20,21 @@ void UPKPoisonAttributionSubsystem::RecordPoisonDeath(AActor* Victim, FName Pois
 
 	DeathRecords.Add(Record);
 
-	UE_LOG(
-		LogTemp,
-		Warning,
-		TEXT("[PoisonKill] Poison death attributed: Victim=%s Poison=%s Instigator=%s PlayerState=%s Time=%.2f"),
-		*GetNameSafe(Record.Victim),
-		*Record.PoisonId.ToString(),
-		*GetNameSafe(Record.Instigator),
-		*GetNameSafe(Record.InstigatorPlayerState),
-		Record.WorldTimeSeconds
-	);
+	if (GEngine)
+	{
+		const FString Message = FString::Printf(
+			TEXT("[PoisonKill] Poison death attributed: Victim=%s Poison=%s Instigator=%s PlayerState=%s Time=%.2f"),
+			*GetNameSafe(Record.Victim),
+			*Record.PoisonId.ToString(),
+			*GetNameSafe(Record.Instigator),
+			*GetNameSafe(Record.InstigatorPlayerState),
+			Record.WorldTimeSeconds
+		);
+
+		GEngine->AddOnScreenDebugMessage(1001, 6.0f, FColor::Yellow, Message);
+		GEngine->AddOnScreenDebugMessage(1002, 6.0f, FColor::Cyan, Message);
+		GEngine->AddOnScreenDebugMessage(1003, 6.0f, FColor::Green, Message);
+	}
 }
 
 void UPKPoisonAttributionSubsystem::ClearDeathRecords()
