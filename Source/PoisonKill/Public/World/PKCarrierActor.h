@@ -58,6 +58,9 @@ public:
 	virtual void OnInteractionCompleted_Implementation(APawn* Interactor) override;
 	virtual void OnInteractionCanceled_Implementation(APawn* Interactor) override;
 
+	UFUNCTION(BlueprintCallable, Category = "PK|Carrier")
+	bool UseCarrier(APawn* User);
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "PK|Carrier")
 	TObjectPtr<UStaticMeshComponent> Mesh;
@@ -88,6 +91,7 @@ private:
 	bool GetSelectedPoison(APawn* Interactor, FName& OutPoisonId, FPKPoisonDefinition& OutDefinition) const;
 	static bool IsPoisonAllowed(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier);
 	static float CalculateContactDose(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier);
+	static bool ShouldDetectPoison(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier);
 	void ApplyPayload(FName PoisonId, float SingleDose, int32 ResidueHits, AActor* AppliedBy);
 
 	friend struct FPKCarrierActorTestAccessor;

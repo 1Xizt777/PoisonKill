@@ -29,6 +29,9 @@ void APKCarrierActor::ClearPayload()
 	const FName PreviousPoisonId = Payload.PoisonId;
 	Payload = FPKCarrierPayload();
 	OnPayloadCleared.Broadcast(PreviousPoisonId, 0.0f, 0);
+	
+	Mesh->SetRenderCustomDepth(false);
+	
 	BP_OnPoisonCleared();
 }
 
@@ -37,16 +40,20 @@ float APKCarrierActor::ConsumeIngestion(APawn* Consumer)
 	UPKPoisonVictimComponent* Victim = GetVictimComponent(Consumer);
 	FPKCarrierDefinition Carrier;
 	FPKPoisonDefinition Poison;
-	if (!Victim ||
-		Payload.IsEmpty() ||
-		!GetCarrierDefinition(Carrier) ||
-		!GetDataSubsystem()->GetPoisonDefinition(Payload.PoisonId, Poison) ||
-		Carrier.CarrierType != EPKCarrierType::Ingestion)
+	if (!Victim ||Payload.IsEmpty() ||!GetCarrierDefinition(Carrier) ||!GetDataSubsystem()->GetPoisonDefinition(Payload.PoisonId, Poison) ||Carrier.CarrierType != EPKCarrierType::Ingestion)
 	{
 		return 0.0f;
 	}
 
-	const float Dose = Payload.RemainingDose;
+		if (ShouldDetectPoison(Poison, Carrier))
+	{
+		const FName DetectedPoisonId = Payload.PoisonId;
+		AActor* AppliedBy = Payload.Instigator;
+		ClearPayload();
+		Victim->NotifyPoisonDetected(DetectedPoisonId, AppliedBy);
+		return 0.0f;
+	}
+const float Dose = Payload.RemainingDose;
 	Victim->ReceivePoisonDose(Payload.PoisonId, Dose, Payload.Instigator);
 	ClearPayload();
 	return Dose;
@@ -57,12 +64,7 @@ float APKCarrierActor::ApplyContactDose(APawn* Toucher)
 	UPKPoisonVictimComponent* Victim = GetVictimComponent(Toucher);
 	FPKCarrierDefinition Carrier;
 	FPKPoisonDefinition Poison;
-	if (!Victim ||
-		Payload.IsEmpty() ||
-		Payload.RemainingResidueHits <= 0 ||
-		!GetCarrierDefinition(Carrier) ||
-		!GetDataSubsystem()->GetPoisonDefinition(Payload.PoisonId, Poison) ||
-		Carrier.CarrierType != EPKCarrierType::Contact)
+	if (!Victim ||Payload.IsEmpty() ||Payload.RemainingResidueHits <= 0 ||!GetCarrierDefinition(Carrier) ||!GetDataSubsystem()->GetPoisonDefinition(Payload.PoisonId, Poison) ||Carrier.CarrierType != EPKCarrierType::Contact)
 	{
 		return 0.0f;
 	}
@@ -142,6 +144,27 @@ void APKCarrierActor::OnInteractionCanceled_Implementation(APawn* Interactor)
 {
 }
 
+bool APKCarrierActor::UseCarrier(APawn* User)
+{
+	FPKCarrierDefinition Carrier;
+	if (!GetCarrierDefinition(Carrier))
+	{
+		return false;
+	}
+
+	if (Carrier.CarrierType == EPKCarrierType::Ingestion)
+	{
+		return ConsumeIngestion(User) > 0.0f;
+	}
+
+	if (Carrier.CarrierType == EPKCarrierType::Contact)
+	{
+		return ApplyContactDose(User) > 0.0f;
+	}
+
+	return false;
+}
+
 UPKGameplayDataSubsystem* APKCarrierActor::GetDataSubsystem() const
 {
 	UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr;
@@ -184,6 +207,11 @@ bool APKCarrierActor::IsPoisonAllowed(const FPKPoisonDefinition& Poison, const F
 	return Poison.AllowedCarrierTypes.Contains(Carrier.CarrierType);
 }
 
+bool APKCarrierActor::ShouldDetectPoison(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier)
+{
+	return Poison.VisualSignificance == EPKVisualSignificance::High && !Carrier.bConcealsVisuals;
+}
+
 float APKCarrierActor::CalculateContactDose(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier)
 {
 	return Poison.SingleDose * Carrier.DoseCoefficient;
@@ -197,5 +225,8 @@ void APKCarrierActor::ApplyPayload(FName PoisonId, float SingleDose, int32 Resid
 	Payload.RemainingResidueHits = FMath::Max(0, ResidueHits);
 	Payload.Instigator = AppliedBy;
 	OnPayloadChanged.Broadcast(PoisonId, Payload.RemainingDose, Payload.RemainingResidueHits);
+	
+	Mesh->SetRenderCustomDepth(true);
+	
 	BP_OnPoisonApplied(PoisonId, Payload.RemainingDose, Payload.RemainingResidueHits);
 }

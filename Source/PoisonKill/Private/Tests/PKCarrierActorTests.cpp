@@ -11,6 +11,11 @@ struct FPKCarrierActorTestAccessor
 		return APKCarrierActor::IsPoisonAllowed(Poison, Carrier);
 	}
 
+	static bool Detect(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier)
+	{
+		return APKCarrierActor::ShouldDetectPoison(Poison, Carrier);
+	}
+
 	static float ContactDose(const FPKPoisonDefinition& Poison, const FPKCarrierDefinition& Carrier)
 	{
 		return APKCarrierActor::CalculateContactDose(Poison, Carrier);
@@ -34,6 +39,14 @@ bool FPKCarrierActorTest::RunTest(const FString& Parameters)
 	IngestionCarrier.CarrierType = EPKCarrierType::Ingestion;
 	IngestionCarrier.DefaultResidueHits = 1;
 
+	FPKCarrierDefinition ClearIngestionCarrier;
+	ClearIngestionCarrier.CarrierType = EPKCarrierType::Ingestion;
+	ClearIngestionCarrier.bConcealsVisuals = false;
+
+	FPKCarrierDefinition ConcealingIngestionCarrier;
+	ConcealingIngestionCarrier.CarrierType = EPKCarrierType::Ingestion;
+	ConcealingIngestionCarrier.bConcealsVisuals = true;
+
 	FPKCarrierDefinition ContactCarrier;
 	ContactCarrier.CarrierType = EPKCarrierType::Contact;
 	ContactCarrier.DoseCoefficient = 0.5f;
@@ -41,10 +54,12 @@ bool FPKCarrierActorTest::RunTest(const FString& Parameters)
 
 	FPKPoisonDefinition Hemlock;
 	Hemlock.SingleDose = 4.0f;
+	Hemlock.VisualSignificance = EPKVisualSignificance::High;
 	Hemlock.AllowedCarrierTypes = { EPKCarrierType::Ingestion };
 
 	FPKPoisonDefinition LeadSugar;
 	LeadSugar.SingleDose = 1.0f;
+	LeadSugar.VisualSignificance = EPKVisualSignificance::Low;
 	LeadSugar.AllowedCarrierTypes = {
 		EPKCarrierType::Ingestion,
 		EPKCarrierType::Contact
@@ -53,6 +68,9 @@ bool FPKCarrierActorTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Hemlock can be applied to ingestion carriers"), FPKCarrierActorTestAccessor::IsAllowed(Hemlock, IngestionCarrier));
 	TestFalse(TEXT("Hemlock cannot be applied to contact carriers"), FPKCarrierActorTestAccessor::IsAllowed(Hemlock, ContactCarrier));
 	TestTrue(TEXT("Lead sugar can be applied to both carrier types"), FPKCarrierActorTestAccessor::IsAllowed(LeadSugar, ContactCarrier));
+	TestTrue(TEXT("Hemlock is detected in clear wine cup"), FPKCarrierActorTestAccessor::Detect(Hemlock, ClearIngestionCarrier));
+	TestFalse(TEXT("Hemlock is concealed in soup pot"), FPKCarrierActorTestAccessor::Detect(Hemlock, ConcealingIngestionCarrier));
+	TestFalse(TEXT("Lead sugar is not detected in clear wine cup"), FPKCarrierActorTestAccessor::Detect(LeadSugar, ClearIngestionCarrier));
 	TestEqual(TEXT("Contact dose uses carrier coefficient"), FPKCarrierActorTestAccessor::ContactDose(LeadSugar, ContactCarrier), 0.5f);
 
 	APKCarrierActor* Carrier = NewObject<APKCarrierActor>(

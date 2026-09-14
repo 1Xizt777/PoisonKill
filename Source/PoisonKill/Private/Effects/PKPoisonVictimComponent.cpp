@@ -45,6 +45,12 @@ float UPKPoisonVictimComponent::GetActualLethalThreshold(FName PoisonId) const
 	return CalculateActualLethalThreshold(Poison, Npc);
 }
 
+void UPKPoisonVictimComponent::NotifyPoisonDetected(FName PoisonId, AActor* Instigator)
+{
+	bAlerted = true;
+	OnPoisonDetected.Broadcast(PoisonId, Instigator);
+	BP_OnPoisonDetected(PoisonId, Instigator);
+}
 bool UPKPoisonVictimComponent::GetPoisonAndNpc(FName PoisonId, FPKPoisonDefinition& OutPoison, FPKNpcDefinition& OutNpc) const
 {
 	UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr;

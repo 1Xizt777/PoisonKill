@@ -36,6 +36,14 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 );
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FPKPoisonDetectedSignature,
+	FName,
+	PoisonId,
+	AActor*,
+	Instigator
+);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
 	FPKPoisonDeathSignature,
 	FName,
 	PoisonId,
@@ -61,6 +69,9 @@ public:
 	FPKPoisonIncubationStartedSignature OnPoisonIncubationStarted;
 
 	UPROPERTY(BlueprintAssignable, Category = "PK|Poison")
+	FPKPoisonDetectedSignature OnPoisonDetected;
+
+	UPROPERTY(BlueprintAssignable, Category = "PK|Poison")
 	FPKPoisonDeathSignature OnPoisonDeath;
 
 	UFUNCTION(BlueprintCallable, Category = "PK|Poison")
@@ -75,8 +86,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "PK|Poison")
 	bool IsDead() const { return bDead; }
 
+	UFUNCTION(BlueprintPure, Category = "PK|Poison")
+	bool IsAlerted() const { return bAlerted; }
+
 	UFUNCTION(BlueprintCallable, Category = "PK|Poison")
 	void SetNpcId(FName NewNpcId) { NpcId = NewNpcId; }
+
+	UFUNCTION(BlueprintCallable, Category = "PK|Poison")
+	void NotifyPoisonDetected(FName PoisonId, AActor* Instigator);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PK|Poison")
@@ -88,6 +105,9 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "PK|Poison", meta = (AllowPrivateAccess = "true"))
 	bool bDead = false;
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "PK|Poison", meta = (AllowPrivateAccess = "true"))
+	bool bAlerted = false;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "PK|Poison")
 	void BP_OnPoisonDoseReceived(FName PoisonId, float TotalDose, float ActualLethalThreshold);
 
@@ -96,6 +116,9 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PK|Poison")
 	void BP_OnPoisonIncubationStarted(FName PoisonId, float IncubationTime);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "PK|Poison")
+	void BP_OnPoisonDetected(FName PoisonId, AActor* Instigator);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "PK|Poison")
 	void BP_OnPoisonDeath(FName PoisonId, AActor* Instigator);
