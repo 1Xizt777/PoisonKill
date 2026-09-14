@@ -18,6 +18,17 @@ void UPKPoisonAttributionSubsystem::RecordPoisonDeath(AActor* Victim, FName Pois
 	}
 
 	DeathRecords.Add(Record);
+
+	UE_LOG(
+		LogTemp,
+		Warning,
+		TEXT("[PoisonKill] Poison death attributed: Victim=%s Poison=%s Instigator=%s PlayerState=%s Time=%.2f"),
+		*GetNameSafe(Record.Victim),
+		*Record.PoisonId.ToString(),
+		*GetNameSafe(Record.Instigator),
+		*GetNameSafe(Record.InstigatorPlayerState),
+		Record.WorldTimeSeconds
+	);
 }
 
 void UPKPoisonAttributionSubsystem::ClearDeathRecords()
